@@ -1,0 +1,35 @@
+#include <TinyWireM.h>
+#include <TEA5767RadioTinyWireM.h>
+
+#ifdef _SW_SERIAL_
+#include "ATtinySerialOut.h"
+
+#define PIN_RX -1
+#define PIN_TX 4
+#define SERIAL_BAUD 115200
+
+//SoftwareSerial SSerial(PIN_RX, PIN_TX);
+//#define Serial SSerial
+#endif
+
+
+TEA5767RadioTinyWireM radio = TEA5767RadioTinyWireM();
+
+float start_freq = 99.2;
+
+void setup()
+{
+  Serial.begin(SERIAL_BAUD);
+  Serial.println(F("Radio..."));
+  delay(200);
+  TinyWireM.begin();
+}
+ 
+void loop()
+{
+  Serial.println(start_freq);
+  radio.setFrequency(start_freq);
+  //start_freq += 0.1;
+  delay(1000);
+}
+

@@ -1,0 +1,26 @@
+#ifdef _SW_SERIAL_
+#include "ATtinySerialOut.h"
+
+#define PIN_RX -1
+#define PIN_TX 4
+#define SERIAL_BAUD 115200
+
+//SoftwareSerial SSerial(PIN_RX, PIN_TX);
+//#define Serial SSerial
+#endif
+
+#include <IRadio.h>
+
+const RADIO_BAND FIX_BAND = RADIO_BAND_FM;
+const RADIO_FREQ FIX_STATION = 9920;
+
+struct RadioState {
+	int volume;
+	bool mono;
+    bool power;
+    bool bassBoost;
+	RADIO_BAND band;
+	RADIO_FREQ freq; 
+} ;
+
+void updateState(IRadio *service);
