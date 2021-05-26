@@ -1,28 +1,32 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#define SERAIL_BRIDGE_ENABLE
-#define OLED_ENABLE
-
-//#define BUF_74HC126D
-#define BUF_74HC125D
 #define PROG_FLICKER true
 
 #include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 
 #ifdef OLED_ENABLE
-// Screen settings
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
-#define SCREEN_MAX_ROWS 8
-#define SCREEN_MAX_COLS 21
-#define SCREEN_ROW_HEIGHT 8
-#define OLED_RESET     -1
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+  // Screen settings
+  #define SCREEN_WIDTH     128 
+  #define SCREEN_HEIGHT     64 
+  #define SCREEN_MAX_ROWS    8
+  #define SCREEN_MAX_COLS   21
+  #define SCREEN_ROW_HEIGHT 16
+  #define OLED_RESET        -1
+
+  #ifdef OLED_LIB_ADAFRUIT
+  #include <Adafruit_GFX.h>
+  #include <Adafruit_SSD1306.h>
+  Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+  #endif
+
+  #ifdef OLED_LIB_TINY
+  #include <Tiny4kOLED.h>
+  SSD1306Device display = oled;
+  #endif
+
 #endif
 
 #if defined(OLED_ENABLE) || defined(SERAIL_BRIDGE_ENABLE)
@@ -46,19 +50,39 @@ SoftwareSerial SSerial(PIN_SERIAL_RX, PIN_SERIAL_TX);
 
 #define SPI_CLOCK 		(1000000/6)
 
-#define RESET     10 // Use pin 10 to reset the target rather than SS
-#define LED_HB    9  // Heartbeat
-#define LED_ERR   8  // Error
-#define LED_PMODE 7  // Programm
+#define RESET      10  // Use pin 10 to reset the target rather than SS
+#if defined(REV_D_TWO_PIN_RESET)
+#define RESET_PULL A2  // Need another pin to pull it down properly
+#endif
+#define LED_HB      9  // Heartbeat
+#define LED_ERR     8  // Error
+#define LED_PMODE   7  // Programm
 
 #define PIN_BUFEN 6  // Enable output buffer, active HIGH on 74HC126D, active LOW on 74HC125D
 #ifdef BUF_74HC126D
-#define BUFFER_ON  digitalWrite(PIN_BUFEN, HIGH)
-#define BUFFER_OFF digitalWrite(PIN_BUFEN, LOW)
+#define BUFFER_ON  digitalWrite(PIN_BUFEN, HIGH);
+#define BUFFER_OFF digitalWrite(PIN_BUFEN, LOW);
 #endif
 #ifdef BUF_74HC125D
-#define BUFFER_ON  digitalWrite(PIN_BUFEN, LOW)
-#define BUFFER_OFF digitalWrite(PIN_BUFEN, HIGH)
+#define BUFFER_ON  digitalWrite(PIN_BUFEN, LOW);
+#define BUFFER_OFF digitalWrite(PIN_BUFEN, HIGH);
+#endif
+#ifdef BUF_74HC241
+#define BUFFER_HV_PROG pinMode(PIN_BUFEN, OUTPUT); digitalWrite(PIN_BUFEN, LOW);
+#define BUFFER_ON pinMode(PIN_BUFEN, OUTPUT); digitalWrite(PIN_BUFEN, HIGH);
+#define BUFFER_OFF pinMode(PIN_BUFEN, INPUT);
+#endif
+
+#if defined(REV_D_TWO_PIN_RESET)
+#define RESET_INIT pinMode(RESET, OUTPUT); pinMode(RESET_PULL, OUTPUT); 
+#define RESET_HIGH digitalWrite(RESET_PULL, LOW); digitalWrite(RESET, HIGH);
+#define RESET_LOW  digitalWrite(RESET, LOW); digitalWrite(RESET_PULL, HIGH);
+#define RESET_Z    digitalWrite(RESET_PULL, LOW); digitalWrite(RESET, LOW);
+#else
+#define RESET_INIT ;
+#define RESET_HIGH pinMode(RESET, OUTPUT); digitalWrite(RESET, HIGH);
+#define RESET_LOW  pinMode(RESET, OUTPUT); digitalWrite(RESET, LOW);
+#define RESET_Z    pinMode(RESET, INPUT); // high impedance state
 #endif
 
 // By default, use hardware SPI pins:
@@ -92,11 +116,6 @@ SoftwareSerial SSerial(PIN_SERIAL_RX, PIN_SERIAL_TX);
 #define SERIAL Serial
 #endif
 
-// Configure the baud rate:
-//#define BAUDRATE_IN	19200
-#define BAUDRATE_IN	115200
-// #define BAUDRATE	1000000
-
 #define HWVER 2
 #define SWMAJ 1
 #define SWMIN 18
@@ -118,6 +137,9 @@ uint8_t write_flash_pages(int length);
 uint8_t write_eeprom_chunk(unsigned int start, unsigned int length);
 
 void serialToScreen();
+
+void display_logo();
+void check_logo();
 
 #endif
 

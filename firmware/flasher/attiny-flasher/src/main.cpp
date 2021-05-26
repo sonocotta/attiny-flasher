@@ -3,9 +3,12 @@
 // If you require a license, see
 // http://www.opensource.org/licenses/bsd-license.php
 //
-// This sketch turns the Arduino into a AVRISP using the following Arduino pins:
+// This sketch turns the Arduino into a AVRISP:
 
 #include "main.h"
+#include "logo.h"
+
+static bool rst_active_high = true;
 
 void setup() {
   SERIAL.begin(BAUDRATE_IN);
@@ -26,26 +29,43 @@ void setup() {
   pulse(LED_HB, 2);
 
   #ifdef OLED_ENABLE
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
-  {
-    SERIAL.println(F("SSD1306 allocation failed"));
-      for (;;) ;
-  }
+  
+    #ifdef OLED_LIB_ADAFRUIT
+    if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
+    {
+      SERIAL.println(F("SSD1306 allocation failed"));
+        for (;;) ;
+    }
+    
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0, 0);
+    display.cp437(true);
+    #endif
 
-  display.clearDisplay();
-  display.setTextSize(2);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 0);
-  display.cp437(true);
+    #ifdef OLED_LIB_TINY
+    oled.begin(SCREEN_WIDTH, SCREEN_HEIGHT, sizeof(tiny4koled_init_128x64br), tiny4koled_init_128x64br);
+    #endif
+
+    display_logo();
+
+    #ifdef OLED_LIB_TINY
+    //oled.setFont(FONT6X8);
+    oled.on();
+    #endif
   #endif
 
   #ifdef SW_SERIAL_ENABLE
   SSerial.listen();
   #endif
+
+  RESET_INIT;
 }
 
 int error = 0;
 int pmode = 0;
+int serial_bridge = 1;
 // address for reading and writing, set by 'U' command
 unsigned int here;
 #define buff_size 128 // 256
@@ -53,10 +73,14 @@ uint8_t buff[buff_size]; // global block storage
 
 #define beget16(addr) (*addr * 256 + *(addr+1) )
 
-static bool rst_active_high;
-
 void reset_target(bool reset) {
-  digitalWrite(RESET, ((reset && rst_active_high) || (!reset && !rst_active_high)) ? HIGH : LOW);
+  if (reset && rst_active_high) {
+    RESET_HIGH;
+  } else if (!reset && !rst_active_high) {
+    RESET_HIGH;
+  } else {
+    RESET_LOW;
+  }
 }
 
 void loop(void) {
@@ -81,6 +105,7 @@ void loop(void) {
     avrisp();
 
   serialToScreen();
+  check_logo();
 }
 
 uint8_t getch() {
@@ -193,7 +218,7 @@ void start_pmode() {
   // So we have to configure RESET as output here,
   // (reset_target() first sets the correct level)
   reset_target(true);
-  pinMode(RESET, OUTPUT);
+  /// pinMode(RESET, OUTPUT);
   SPI.begin();
   SPI.beginTransaction(SPISettings(SPI_CLOCK, MSBFIRST, SPI_MODE0));
 
@@ -220,7 +245,8 @@ void end_pmode() {
   pinMode(PIN_MOSI, INPUT);
   pinMode(PIN_SCK, INPUT);
   reset_target(false);
-  pinMode(RESET, INPUT);
+  ///pinMode(RESET, INPUT);
+  RESET_Z;
   pmode = 0;
 
   BUFFER_OFF;
@@ -420,6 +446,7 @@ void avrisp() {
   switch (ch) {
     case '0': // signon
       error = 0;
+      serial_bridge = 0;
       empty_reply();
       break;
     case '1':
@@ -481,6 +508,7 @@ void avrisp() {
       error = 0;
       end_pmode();
       empty_reply();
+      serial_bridge = 1;
       break;
 
     case 0x75: //STK_READ_SIGN 'u'
@@ -504,27 +532,18 @@ void avrisp() {
   }
 }
 
-#define bufferSize 32
+#define bufferSize 64
 uint8_t buf[bufferSize];
 uint8_t i = 0;
 
 void serialToScreen()
 {
-  if (pmode == 1)
+  if (pmode == 1 || !serial_bridge)
     return;
 
   #ifdef SW_SERIAL_ENABLE
   if (SSerial.available())
   {
-    // uint8_t cursor_y = display.getCursorY() % SCREEN_HEIGHT;
-    // uint8_t cursor_x = display.getCursorX();
-    // //display.clearDisplay();
-    // display.drawFastHLine(cursor_x, cursor_y, SCREEN_WIDTH, SSD1306_BLACK);
-    // display.setCursor(cursor_x, cursor_y);
-
-    //SERIAL.write('\n');
-    //SERIAL.write('>');
-    
     while (1)
     {
       if (SSerial.available())
@@ -535,19 +554,12 @@ void serialToScreen()
       }
       else
       {
-        //delayMicroseconds(packTimeoutMicros);
-        //delay(packTimeout);
         if (!SSerial.available())
         {
-          // SERIAL.print(i);
-          // SERIAL.write(' ');
           break;
         }
       }
     }
-
-    // display.write((char *)buf, i);
-    // display.display();
 
     for (uint8_t j = 0; j < i; j++)
     {
@@ -557,36 +569,103 @@ void serialToScreen()
       }
       #endif
       
-      // if (buf[j] == 13)
-      // {
-      //   uint8_t cursor_y = display.getCursorY();
-      //   for (uint8_t k = 0; k < SCREEN_ROW_HEIGHT; k++) 
-      //     display.drawFastHLine(0, cursor_y + k, SCREEN_WIDTH, SSD1306_BLACK);
-      // }
       #ifdef OLED_ENABLE
-      display.print((char)buf[j]);
-      #endif
+        #ifdef OLED_LIB_ADAFRUIT
+          display.print((char)buf[j]);
+        #endif
 
-      // if (buf[j] == 13 && display.getCursorY() >= SCREEN_HEIGHT - SCREEN_ROW_HEIGHT)
-      // {
-      //   uint8_t cursor_y = 0; //display.getCursorY() % SCREEN_HEIGHT;
-      //   uint8_t cursor_x = display.getCursorX();
-      //   display.clearDisplay();
-      //   display.setCursor(cursor_x, cursor_y);
-      // }
+        #ifdef OLED_LIB_TINY
+        if (buf[j] == '\n') {
+          if (display.getCursorY() << 3 >= SCREEN_HEIGHT - SCREEN_ROW_HEIGHT) {
+            display.clear();
+            display.setCursor(0, 0);
+          } else {
+            display.print((char)buf[j]);  
+          }
+        } else {
+          display.print((char)buf[j]);
+        }
+        #endif
+        
+      #endif
     }
     
     #ifdef OLED_ENABLE
-    display.display();
+      #ifdef OLED_LIB_ADAFRUIT
+      display.display();
+      #endif
+      #ifdef OLED_LIB_TINY
+      
+      #endif
     #endif
 
     #ifdef OLED_ENABLE
-    if (display.getCursorY() > SCREEN_HEIGHT - SCREEN_ROW_HEIGHT) {
-      display.clearDisplay();
-      display.setCursor(0, 0);
-    }
+      #ifdef OLED_LIB_ADAFRUIT
+      if (display.getCursorY() > SCREEN_HEIGHT - SCREEN_ROW_HEIGHT) {
+        display.clearDisplay();
+        display.setCursor(0, 0);
+      }
+      #endif
     i = 0;
     #endif
   }
   #endif
+}
+
+bool logo_hidden = true;
+
+void display_logo() {
+  
+  #ifdef OLED_LIB_ADAFRUIT
+  display.clearDisplay();
+  display.drawBitmap(0, 0, bitmap_logo, LOGO_BMPWIDTH, LOGO_BMPHEIGHT, SSD1306_WHITE);
+
+  display.setTextSize(1);  
+  display.setCursor(72, 0);
+  display.print(F("ATTINY"));
+  display.setCursor(72, 16);
+  display.print(F("FLASHER"));
+  display.setCursor(72, 32);
+  display.print(F("Rev.E by"));
+  display.setCursor(72, 48);
+  display.print(F("SONOCOTTA"));
+  display.display();
+  logo_hidden = false;
+  #endif
+
+  #ifdef OLED_LIB_TINY
+  display.setFont(FONT8X16);
+  display.clear();
+  display.bitmap(0, 0, LOGO_BMPWIDTH, 8, bitmap_logo);
+  display.setCursor(72, 0);
+  display.print(F("ATTINY"));
+  display.setCursor(72, 2);
+  display.print(F("FLASHER"));
+  display.setCursor(72, 4);
+  display.print(F("rv.E by"));
+  display.setCursor(56, 6);
+  display.print(F("SONOCOTTA"));
+  display.on();
+  logo_hidden = false;
+  #endif 
+}
+
+void check_logo() {
+  
+  #ifdef OLED_LIB_ADAFRUIT
+  if (!logo_hidden)
+    if (millis() > LOGO_SHOW_MSEC) {
+      display.clearDisplay();
+      display.display();
+      logo_hidden = true;
+    }
+  #endif 
+
+  #ifdef OLED_LIB_TINY
+  if (!logo_hidden)
+    if (millis() > LOGO_SHOW_MSEC) {
+      display.clear();
+      logo_hidden = true;
+    }
+  #endif 
 }
