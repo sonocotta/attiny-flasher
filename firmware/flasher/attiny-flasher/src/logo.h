@@ -1,8 +1,11 @@
+#ifndef _LOGO_H_
+#define _LOGO_H_
+
 #ifdef OLED_ENABLE
 
-    #define LOGO_BMPWIDTH  64
-    #define LOGO_BMPHEIGHT 64
-    #define LOGO_SHOW_MSEC 2000
+#define LOGO_BMPWIDTH  64
+#define LOGO_BMPHEIGHT 64
+#define LOGO_SHOW_MSEC 2000
 
 #ifdef OLED_LIB_ADAFRUIT
 
@@ -89,4 +92,6 @@
     };
 
 #endif
+#endif
+
 #endif
