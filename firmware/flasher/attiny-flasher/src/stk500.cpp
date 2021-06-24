@@ -40,8 +40,9 @@ void STK500::avrisp()
         empty_reply();
         break;
 
-    case CMND_STK_SET_DEVICE_EXT: // NOT SUPPORTED
-        fill(5);
+    case CMND_STK_SET_DEVICE_EXT: 
+        fill(getch() - 1);
+        set_ext_parameters();
         empty_reply();
         break;
 
@@ -59,8 +60,8 @@ void STK500::avrisp()
         break;
 
     case CMND_STK_LOAD_ADDRESS:
-        here = getch();
-        here += 256 * getch();
+        addr = getch();
+        addr += getch() << 8;
         empty_reply();
         break;
 
@@ -171,6 +172,27 @@ void STK500::get_version(uint8_t c)
     }
 }
 
+uint16_t STK500::current_page()
+{
+    if (param.pagesize == 32)
+    {
+        return addr & 0xFFFFFFF0;
+    }
+    if (param.pagesize == 64)
+    {
+        return addr & 0xFFFFFFE0;
+    }
+    if (param.pagesize == 128)
+    {
+        return addr & 0xFFFFFFC0;
+    }
+    if (param.pagesize == 256)
+    {
+        return addr & 0xFFFFFF80;
+    }
+    return addr;
+}
+
 void STK500::fill(int n)
 {
     for (int x = 0; x < n; x++)
@@ -202,4 +224,9 @@ void STK500::set_parameters()
 
     // AVR devices have active low reset, AT89Sx are active high
     rst_active_high = (param.devicecode >= 0xe0);
+}
+
+void STK500::set_ext_parameters()
+{
+    param.eeprom_page_size = buff[0];
 }

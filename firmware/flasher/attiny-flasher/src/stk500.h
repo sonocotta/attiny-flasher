@@ -5,7 +5,6 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <SoftwareSerial.h>
-// #include "display.h"
 
 // Command definitions
 #define CMND_STK_GET_SYNC 0x30
@@ -13,7 +12,7 @@
 #define CMND_STK_SET_PARAMETER 0x40 // NOT SUPPORTED
 #define CMND_STK_GET_PARAMETER 0x41
 #define CMND_STK_SET_DEVICE 0x42
-#define CMND_STK_SET_DEVICE_EXT 0x45 // IGNORED
+#define CMND_STK_SET_DEVICE_EXT 0x45
 #define CMND_STK_ENTER_PROGMODE 0x50
 #define CMND_STK_LEAVE_PROGMODE 0x51
 #define CMND_STK_CHIP_ERASE 0x52    // NOT SUPPORTED
@@ -71,15 +70,18 @@ typedef struct param
     uint16_t pagesize;
     uint16_t eepromsize;
     uint32_t flashsize;
+    uint8_t eeprom_page_size;
 } parameter;
 
 class STK500
 {
 public:
+    STK500(){};
     STK500(SoftwareSerial *serial);
 
     bool serial_busy = false;
     bool programming = false;
+    bool reset_locked = false;
     bool error = false;
 
     void avrisp();
@@ -87,13 +89,15 @@ public:
 protected:
     SoftwareSerial *sserial;
     parameter param;
+    uint8_t flash_page = 0;
     bool rst_active_high = true;
     uint8_t buff[BUFFER_SIZE];
-    unsigned int here = 0;
+    uint16_t addr = 0;
 
     uint8_t getch();
     void breply(char b);
     void fill(int n);
+    uint16_t current_page();
 
     virtual void start_programming();
     virtual void end_programming();
@@ -106,9 +110,8 @@ private:
     void empty_reply();
     void get_version(uint8_t c);
     void set_parameters();
+    void set_ext_parameters();
 };
-
-#endif
 
 #ifdef SERIAL_DEBUG_ENABLE
 #define LOG_CMD_IN(x)             \
@@ -116,13 +119,29 @@ private:
         sserial->print("< 0x");   \
         sserial->println(x, HEX); \
     }
-#define SPI_LOG(x)               \
-    {                            \
-        sserial->print("X ");     \
-        sserial->print(here);     \
-        sserial->print(" 0x");     \
+#ifdef SERIAL_DEBUG_SPI_ENABLE
+#define SPI_LOG(x)                \
+    {                             \
+        sserial->print("S ");     \
+        sserial->print(addr);     \
+        sserial->print(" 0x");    \
         sserial->println(x, HEX); \
     }
+#define HVSP_LOG(x, y, z)         \
+    {                             \
+        sserial->print("H");      \
+        sserial->print(" 0x");    \
+        sserial->print(x, HEX);   \
+        sserial->print(" 0x");    \
+        sserial->print(y, HEX);   \
+        sserial->print(" 0x");    \
+        sserial->println(z, HEX); \
+    }
+#else
+#define SPI_LOG(x) ;
+#define HVSP_LOG(x, y, z) ;
+#endif
+
 #define SERIAL_OUTC(x)            \
     {                             \
         Serial.print(x);          \
@@ -135,6 +154,12 @@ private:
         sserial->print("> "); \
         sserial->println(x);  \
     }
+#define SERIAL_OUT(s, x)     \
+    {                        \
+        sserial->print(s);   \
+        sserial->print(' '); \
+        sserial->println(x); \
+    }
 #else
 #define LOG_CMD_IN(x)
 #define SPI_LOG(x)
@@ -146,4 +171,10 @@ private:
     {                    \
         Serial.print(x); \
     }
+#define SERIAL_OUT(s, x) ;
+
+#define SPI_LOG(x) ;
+#define HVSP_LOG(x, y, z) ;
+#endif
+
 #endif

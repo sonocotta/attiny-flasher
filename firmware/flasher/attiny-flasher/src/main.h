@@ -5,6 +5,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include "isp.h"
+#include "boards.h"
 
 #define PULSE_TIME 10
 #define LED_HB      9  // Heartbeat
@@ -32,14 +33,13 @@
 
 #endif
 
-#if defined(OLED_ENABLE) || defined(SERAIL_BRIDGE_ENABLE) || defined(SERIAL_DEBUG_ENABLE)
+#if defined(OLED_ENABLE) || defined(SERIAL_BRIDGE_ENABLE) || defined(SERIAL_DEBUG_ENABLE)
 #define SW_SERIAL_ENABLE
 // Tiny-linked Serial pins
-#define PIN_SERIAL_RX 4
+#define PIN_SERIAL_RX -1 //4
 #define PIN_SERIAL_TX 5
 #include <SoftwareSerial.h>
 SoftwareSerial SSerial(PIN_SERIAL_RX, PIN_SERIAL_TX);
-#define BAUDRATE_OUT	115200
 #undef SERIAL
 #endif
 

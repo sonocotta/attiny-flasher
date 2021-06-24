@@ -59,7 +59,7 @@ void flash_pins() {
 
 void loop()
 {
-  uint8_t _state = state++ % 3;
+  uint8_t _state = state++ % 5;
   switch (_state) {
     case 0:
       BUFFER_OFF
@@ -83,10 +83,34 @@ void loop()
       flash_pins();
     break;
 
-    case 2: 
+    case 2:
+      pins_lv_flash();
+      BUFFER_ON
+      RESET_HIGH
+
+      digitalWrite(LED_PMODE, LOW);
+      digitalWrite(LED_ERR, HIGH);
+      digitalWrite(LED_HB, LOW);
+
+      flash_pins();
+    break;
+
+    case 3: 
       pins_hv_flash();
       BUFFER_HV_PROG
-      RESET_HIGH
+      RESET_LOW
+
+      digitalWrite(LED_PMODE, LOW);
+      digitalWrite(LED_ERR, LOW);
+      digitalWrite(LED_HB, HIGH);
+
+      flash_pins();
+    break;
+
+    case 4: 
+      pins_hv_flash();
+      BUFFER_HV_PROG
+      RESET_HIGH_12
 
       digitalWrite(LED_PMODE, LOW);
       digitalWrite(LED_ERR, LOW);

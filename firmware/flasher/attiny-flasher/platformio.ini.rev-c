@@ -1,0 +1,51 @@
+; Serial Bridge disabled, it is available for Atiny Flasher debugging purposes
+[env:nanoatmega328-rev-c-no-disp-no-ser-br]
+platform = atmelavr
+board = nanoatmega328
+framework = arduino
+monitor_speed = 115200
+monitor_port = /dev/ttyUSB1
+build_flags =
+  -D FLASHER_REV_C=1
+  -D SERIAL_DEBUG_ENABLE=1
+
+; All display functionality disabled
+[env:nanoatmega328-rev-c-no-disp]
+platform = atmelavr
+board = nanoatmega328
+framework = arduino
+monitor_speed = 115200
+build_flags =
+  -D FLASHER_REV_C=1
+
+; Display functionality based on Adafruit library
+[env:nanoatmega328-rev-c]
+platform = atmelavr
+board = nanoatmega328
+framework = arduino
+monitor_speed = 115200
+build_flags =
+  -D FLASHER_REV_C=1
+  -D OLED_LIB_ADAFRUIT=1
+  -D OLED_ENABLE=1
+lib_deps = 
+    Adafruit BusIO
+    Adafruit GFX Library
+    Adafruit SSD1306
+
+; Display functionality based on Tiny4k library
+[env:nanoatmega328-rev-c-smaller]
+platform = atmelavr
+board = nanoatmega328
+; board = nanoatmega168
+; board_build.mcu = atmega168
+framework = arduino
+monitor_speed = 115200
+build_flags =
+  -D FLASHER_REV_C=1
+  -D OLED_LIB_TINY=1
+  -D OLED_ENABLE=1
+lib_deps = 
+  SPI
+  Wire
+  SoftwareSerial
