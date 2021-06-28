@@ -12,9 +12,13 @@
 #define PIN_TX 4
 SoftwareSerial mySerial(PIN_RX, PIN_TX);
 #define Serial mySerial
+
+#define PINS_COUNT 3
+#else
+#define PINS_COUNT 6
 #endif
 
-#define PINS_COUNT 6
+
 
 void setup() {
   for (uint8_t i = 0; i < PINS_COUNT; i++)
