@@ -6,15 +6,20 @@
 // Connection with target MCU (SW serial)
 #define BAUDRATE_OUT 115200
 
-// REVISION CAPABILITES DEFINITION
+// ======= REVISION CAPABILITES DEFINITION ============
+
 #if defined(FLASHER_REV_C) || defined(FLASHER_REV_D)
 #define BUF_74HC125D
 #endif
 
 #ifdef FLASHER_REV_E
 #define REV_D_TWO_PIN_RESET
+#define SERIAL_SENSOR_EN
+#define SERIAL_SENSOR_PIN A3
 #define RESET_SENSOR_EN
 #define BUF_74HC241
+
+// ============== RESET MODES DEFINITION ==============
 
 #define RESET_SENSOR_PIN 2
 #define RESET_SENSOR_WRITE(X)          \
@@ -82,6 +87,8 @@
 #define RESET_Z pinMode(RESET, INPUT); // high impedance state
 #endif
 
+// ============== PIN MODES DEFINITION ==============
+
 #define PIN_MOSI MOSI
 #define PIN_MISO MISO
 #define PIN_SCK SCK
@@ -128,5 +135,11 @@
 
 #define HVSP_SDO_STATE \
     digitalRead(PIN_SDO)
+
+// ============== SW SERIAL ==============
+
+#if defined(OLED_ENABLE) || defined(SERIAL_BRIDGE_ENABLE) || defined(SERIAL_DEBUG_ENABLE)
+#define SW_SERIAL_ENABLE
+#endif
 
 #endif

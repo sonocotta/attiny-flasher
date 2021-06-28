@@ -12,6 +12,15 @@
 #define LED_ERR     8  // Error
 #define LED_PMODE   7  // Programm
 
+#if defined(SW_SERIAL_ENABLE)
+#include <SoftwareSerial.h>
+// Tiny-linked Serial pins
+#define PIN_SERIAL_RX 4
+#define PIN_SERIAL_TX 5
+SoftwareSerial* SSerial = NULL;
+#undef SERIAL
+#endif
+
 #ifdef OLED_ENABLE
   // Screen settings
   #define SCREEN_WIDTH     128 
@@ -30,17 +39,6 @@
   #ifdef OLED_LIB_TINY
   Ssd1306 * display = &oled;
   #endif
-
-#endif
-
-#if defined(OLED_ENABLE) || defined(SERIAL_BRIDGE_ENABLE) || defined(SERIAL_DEBUG_ENABLE)
-#define SW_SERIAL_ENABLE
-// Tiny-linked Serial pins
-#define PIN_SERIAL_RX -1 //4
-#define PIN_SERIAL_TX 5
-#include <SoftwareSerial.h>
-SoftwareSerial SSerial(PIN_SERIAL_RX, PIN_SERIAL_TX);
-#undef SERIAL
 #endif
 
 void serial_bridge_loop();

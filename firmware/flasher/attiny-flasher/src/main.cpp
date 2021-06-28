@@ -1,16 +1,9 @@
-// ArduinoISP
-// Copyright (c) 2008-2011 Randall Bohn
-// If you require a license, see
-// http://www.opensource.org/licenses/bsd-license.php
-//
-// This sketch turns the Arduino into a AVRISP:
-
 #include "main.h"
 #include "logo.h"
 #include "isp.h"
 
 #ifdef SW_SERIAL_ENABLE
-ISP *isp = new ISP(&SSerial);
+ISP *isp = new ISP(SSerial);
 #else
 ISP *isp = new ISP();
 #endif
@@ -18,7 +11,7 @@ ISP *isp = new ISP();
 #if defined(FLASHER_REV_E)
 #include "hvsp.h"
 #ifdef SW_SERIAL_ENABLE
-HVSP *hvsp = new HVSP(&SSerial);
+HVSP *hvsp = new HVSP(SSerial);
 #else
 HVSP *hvsp = new HVSP();
 #endif
@@ -28,8 +21,18 @@ void setup()
 {
   Serial.begin(BAUDRATE_IN);
 
-#ifdef SW_SERIAL_ENABLE
-  SSerial.begin(BAUDRATE_OUT);
+#ifdef SERIAL_SENSOR_EN
+  pinMode(SERIAL_SENSOR_PIN, INPUT);
+  uint8_t _ser_mode = digitalRead(SERIAL_SENSOR_PIN);
+  if (_ser_mode == LOW)
+  {
+    SSerial = new SoftwareSerial(PIN_SERIAL_RX, PIN_SERIAL_TX);
+    SSerial->begin(BAUDRATE_OUT);
+    SSerial->listen();
+#ifdef SERIAL_DEBUG_ENABLE
+    SSerial->println(F("Ready..."));
+#endif
+  }
 #endif
 
   pinMode(LED_PMODE, OUTPUT);
@@ -69,24 +72,21 @@ void setup()
   display->on();
 #endif
 #endif
-
-#ifdef SW_SERIAL_ENABLE
-  SSerial.listen();
-#endif
-
-#ifdef SERIAL_DEBUG_ENABLE
-  SSerial.println(F("Ready..."));
-#endif
 }
 
 #ifdef RESET_SENSOR_EN
 uint8_t reset_state_cnt = 0;
 #endif
 
+#ifdef SERIAL_SENSOR_EN
+uint8_t serial_state_cnt = 0;
+#endif
+
 int8_t hv_mode = -1;
 
 void loop(void)
 {
+
 #if defined(RESET_SENSOR_EN) && defined(FLASHER_REV_E)
   if (!(hv_mode && hvsp->reset_locked) || (!hv_mode && isp->reset_locked))
   {
@@ -161,19 +161,19 @@ void serial_bridge_loop()
   if (isp->programming || isp->serial_busy)
     return;
 
-  if (SSerial.available())
+  if (SSerial != NULL && SSerial->available())
   {
     while (1)
     {
-      if (SSerial.available())
+      if (SSerial != NULL && SSerial->available())
       {
-        buf[i] = (char)SSerial.read();
+        buf[i] = (char)SSerial->read();
         if (i < bufferSize - 1)
           i++;
       }
       else
       {
-        if (!SSerial.available())
+        if (!SSerial->available())
         {
           break;
         }
