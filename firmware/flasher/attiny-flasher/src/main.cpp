@@ -2,28 +2,22 @@
 #include "logo.h"
 #include "isp.h"
 
-#ifdef SW_SERIAL_ENABLE
-ISP *isp = new ISP(SSerial);
-#else
-ISP *isp = new ISP();
-#endif
-
+ISP *isp = NULL;
 #if defined(FLASHER_REV_E)
 #include "hvsp.h"
-#ifdef SW_SERIAL_ENABLE
-HVSP *hvsp = new HVSP(SSerial);
-#else
-HVSP *hvsp = new HVSP();
-#endif
+HVSP *hvsp = NULL;
 #endif
 
 void setup()
 {
   Serial.begin(BAUDRATE_IN);
 
-#ifdef SERIAL_SENSOR_EN
+#if defined(SERIAL_SENSOR_EN) && !defined(SERIAL_DEBUG_ENABLE)
   pinMode(SERIAL_SENSOR_PIN, INPUT);
   uint8_t _ser_mode = digitalRead(SERIAL_SENSOR_PIN);
+#else
+  uint8_t _ser_mode = LOW;
+#endif
   if (_ser_mode == LOW)
   {
     SSerial = new SoftwareSerial(PIN_SERIAL_RX, PIN_SERIAL_TX);
@@ -33,7 +27,23 @@ void setup()
     SSerial->println(F("Ready..."));
 #endif
   }
+
+  if (SSerial != NULL)
+  {
+    isp = new ISP(SSerial);
+#if defined(FLASHER_REV_E)
+    hvsp = new HVSP(SSerial);
 #endif
+  }
+  else
+  {
+    isp = new ISP();
+#if defined(FLASHER_REV_E)
+    hvsp = new HVSP();
+#endif
+  }
+
+  BUFFER_INIT;
 
   pinMode(LED_PMODE, OUTPUT);
   pulse(LED_PMODE, 2);
@@ -78,10 +88,6 @@ void setup()
 uint8_t reset_state_cnt = 0;
 #endif
 
-#ifdef SERIAL_SENSOR_EN
-uint8_t serial_state_cnt = 0;
-#endif
-
 int8_t hv_mode = -1;
 
 void loop(void)
@@ -106,7 +112,11 @@ void loop(void)
     }
   }
 #else
-  hv_mode = 0;
+  if (hv_mode == -1)
+  {
+    isp->init();
+    hv_mode = 0;
+  }
 #endif
 
   if (hv_mode)

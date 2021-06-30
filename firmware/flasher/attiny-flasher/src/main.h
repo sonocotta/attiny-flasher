@@ -7,16 +7,8 @@
 #include "isp.h"
 #include "boards.h"
 
-#define PULSE_TIME 10
-#define LED_HB      9  // Heartbeat
-#define LED_ERR     8  // Error
-#define LED_PMODE   7  // Programm
-
 #if defined(SW_SERIAL_ENABLE)
 #include <SoftwareSerial.h>
-// Tiny-linked Serial pins
-#define PIN_SERIAL_RX 4
-#define PIN_SERIAL_TX 5
 SoftwareSerial* SSerial = NULL;
 #undef SERIAL
 #endif

@@ -4,7 +4,6 @@
 
 void HVSP::init()
 {
-    // sserial->println("hvsp::init");
     BUFFER_OFF;
     RESET_INIT;
     RESET_Z;

@@ -8,8 +8,18 @@
 
 // ======= REVISION CAPABILITES DEFINITION ============
 
-#if defined(FLASHER_REV_C) || defined(FLASHER_REV_D)
+#if defined(FLASHER_REV_C) 
 #define BUF_74HC125D
+// Tiny-linked Serial pins
+#define PIN_SERIAL_RX 5
+#define PIN_SERIAL_TX 4
+#endif
+
+#if defined(FLASHER_REV_D)
+#define BUF_74HC125D
+// Tiny-linked Serial pins
+#define PIN_SERIAL_RX 4
+#define PIN_SERIAL_TX 5
 #endif
 
 #ifdef FLASHER_REV_E
@@ -18,6 +28,9 @@
 #define SERIAL_SENSOR_PIN A3
 #define RESET_SENSOR_EN
 #define BUF_74HC241
+// Tiny-linked Serial pins
+#define PIN_SERIAL_RX 4
+#define PIN_SERIAL_TX 5
 
 // ============== RESET MODES DEFINITION ==============
 
@@ -37,18 +50,27 @@
 #define PIN_BUFEN 6 // Enable output buffer, active HIGH on 74HC126D, active LOW on 74HC125D
 #ifdef BUF_74HC126D
 #define BUFFER_HV_PROG ;
-#define BUFFER_ON digitalWrite(PIN_BUFEN, HIGH);
-#define BUFFER_OFF digitalWrite(PIN_BUFEN, LOW);
+#define BUFFER_INIT             \
+    pinMode(PIN_BUFEN, OUTPUT); \
+#define BUFFER_ON           \
+        digitalWrite(PIN_BUFEN, HIGH);
+#define BUFFER_OFF \
+    digitalWrite(PIN_BUFEN, LOW);
 #endif
 #ifdef BUF_74HC125D
 #define BUFFER_HV_PROG ;
-#define BUFFER_ON digitalWrite(PIN_BUFEN, LOW);
-#define BUFFER_OFF digitalWrite(PIN_BUFEN, HIGH);
+#define BUFFER_INIT \
+    pinMode(PIN_BUFEN, OUTPUT);
+#define BUFFER_ON \
+    digitalWrite(PIN_BUFEN, LOW);
+#define BUFFER_OFF \
+    digitalWrite(PIN_BUFEN, HIGH);
 #endif
 #ifdef BUF_74HC241
 #define BUFFER_HV_PROG          \
     pinMode(PIN_BUFEN, OUTPUT); \
     digitalWrite(PIN_BUFEN, LOW);
+#define BUFFER_INIT ;
 #define BUFFER_ON               \
     pinMode(PIN_BUFEN, OUTPUT); \
     digitalWrite(PIN_BUFEN, HIGH);
@@ -86,6 +108,13 @@
     digitalWrite(RESET, LOW);
 #define RESET_Z pinMode(RESET, INPUT); // high impedance state
 #endif
+
+// ======= INDICATION PINS ============================
+
+#define PULSE_TIME 10
+#define LED_HB 9    // Heartbeat
+#define LED_ERR 8   // Error
+#define LED_PMODE 7 // Programm
 
 // ============== PIN MODES DEFINITION ==============
 

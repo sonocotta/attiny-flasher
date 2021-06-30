@@ -1,40 +1,37 @@
 #include <Arduino.h>
+#include "boards.h"
 #include "main.h"
 
-//#define PIN_BST_ON 2
-
-#define SERIAL_SPEED 9600
+#ifdef REV_D_TWO_PIN_RESET
+#define STATES_CNT 5
+#else 
+#define STATES_CNT 3
+#endif
 
 void pins_hv_flash() {
-  pinMode(SCI, OUTPUT);
-  pinMode(SDO, INPUT);
-  pinMode(SII, OUTPUT);
-  pinMode(SDI, OUTPUT);
+  pinMode(PIN_SCI, OUTPUT);
+  pinMode(PIN_SDO, INPUT);
+  pinMode(PIN_SII, OUTPUT);
+  pinMode(PIN_SDI, OUTPUT);
 }
 
 void pins_lv_flash() {
-  pinMode(SCI, INPUT);
-  pinMode(SDO, OUTPUT);
-  pinMode(SII, INPUT);
-  pinMode(SDI, OUTPUT);
+  pinMode(PIN_SCI, INPUT);
+  pinMode(PIN_SDO, OUTPUT);
+  pinMode(PIN_SII, INPUT);
+  pinMode(PIN_SDI, OUTPUT);
 }
 
 void setup() {
-  Serial.begin(SERIAL_SPEED);
+  Serial.begin(BAUDRATE_OUT);
 
-  pinMode(PIN_BUFEN, OUTPUT);
-  pinMode(RESET, OUTPUT);
-  pinMode(RESET_PULL, OUTPUT);
+  BUFFER_INIT;
+  RESET_INIT;
   RESET_Z;
 
   pinMode(LED_HB, OUTPUT);
   pinMode(LED_ERR, OUTPUT);
   pinMode(LED_PMODE, OUTPUT);
-
-  // pinMode(SCI, OUTPUT);
-  // pinMode(SDO, INPUT);
-  // pinMode(SII, OUTPUT);
-  // pinMode(SDI, OUTPUT);
 
   Serial.println("Ready");
 }
@@ -42,14 +39,14 @@ void setup() {
 uint8_t state = 0;
 
 void flash_pins_state(bool on) {
-  digitalWrite(SCI, on);
-  digitalWrite(SII, on);
-  digitalWrite(SDI, on);
-  digitalWrite(SDO, on);
+  digitalWrite(PIN_SCI, on);
+  digitalWrite(PIN_SII, on);
+  digitalWrite(PIN_SDI, on);
+  digitalWrite(PIN_SDO, on);
 }
 
 void flash_pins() {
-  for (uint8_t i = 0; i< 10; i++) {
+  for (uint8_t i = 0; i < 10; i++) {
     flash_pins_state(true);
     delay(50);
     flash_pins_state(false);
@@ -59,7 +56,7 @@ void flash_pins() {
 
 void loop()
 {
-  uint8_t _state = state++ % 5;
+  uint8_t _state = state++ % STATES_CNT;
   switch (_state) {
     case 0:
       BUFFER_OFF

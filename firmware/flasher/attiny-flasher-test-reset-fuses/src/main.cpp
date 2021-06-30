@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "boards.h"
 #include "main.h"
 #define SERIAL_SPEED 9600
 
@@ -6,28 +7,10 @@ void setup()
 {
   Serial.begin(SERIAL_SPEED);
 
-  pinMode(PIN_BUFEN, OUTPUT);
-  BUFFER_OFF;
-
-  pinMode(LED_PMODE, OUTPUT);
-  pinMode(LED_ERR, OUTPUT);
-  pinMode(LED_HB, OUTPUT);
-  
-  pinMode(PIN_BUFEN, OUTPUT);
-  pinMode(RESET, OUTPUT);
-  pinMode(RESET_PULL, OUTPUT);
-
-  pinMode(LED_HB, OUTPUT);
-  pinMode(LED_ERR, OUTPUT);
-  pinMode(LED_PMODE, OUTPUT);
-
-  pinMode(SDI, OUTPUT);
-  pinMode(SII, OUTPUT);
-  pinMode(SCI, OUTPUT);
-  pinMode(SDO, INPUT);
-
   RESET_INIT;
+  BUFFER_OFF;
   RESET_Z;
+  SETUP_PINS_HVSP;
 
   Serial.println("Ready");
 }
@@ -37,38 +20,34 @@ void loop()
   if (Serial.available() > 0)
   {
     Serial.read();
-
     Serial.println(F("starting..."));
 
-    BUFFER_HV_PROG;
+    RESET_HIGH_12;
+    _delay_ms(25);
+    RESET_Z;
 
-    pinMode(SDO, OUTPUT); // Set SDO to output
-    digitalWrite(SDI, LOW);
-    digitalWrite(SII, LOW);
-    digitalWrite(SDO, LOW);
-    
+    BUFFER_HV_PROG;
+    SETUP_PINS_HVSP_INIT;
     RESET_LOW;
-    
     //digitalWrite(VCC, HIGH); // Vcc On
-    delayMicroseconds(20);
+    _delay_us(20);
     //onOff = 1; // 12v On
-    
     Serial.println(F("HV on"));
-    RESET_HIGH;
-    //while (pwrOn == 0)
-    //  ;
-    delayMicroseconds(10);
-
+    RESET_HIGH_12;
+    _delay_us(10);
     BUFFER_OFF;
-    pinMode(SDO, INPUT); // Set SDO to input
-    delayMicroseconds(300);
+
+    SETUP_PINS_HVSP;
+    _delay_us(300);
 
     BUFFER_HV_PROG;
+
     Serial.println(F("Reading signature..."));
-    unsigned int sig = readSignature();
-    
+
+    uint16_t sig = readSignature();
     Serial.print("Signature is: ");
     Serial.println(sig, HEX);
+
     readFuses();
     if (sig == ATTINY13)
     {
@@ -82,8 +61,10 @@ void loop()
       writeFuse(HFUSE, 0xDF);
       writeFuse(EFUSE, 0xFF);
     }
+
     readFuses();
-    digitalWrite(SCI, LOW);
+    
+    digitalWrite(PIN_SCI, LOW);
     //digitalWrite(VCC, LOW); // Vcc Off
     //onOff = 0;              // 12v Off
     BUFFER_OFF;
@@ -95,20 +76,22 @@ byte shiftOut(byte val1, byte val2)
 {
   int inBits = 0;
   //Wait until SDO goes high
-  while (!digitalRead(SDO))
+  while (!digitalRead(PIN_SDO))
     ;
   unsigned int dout = (unsigned int)val1 << 2;
   unsigned int iout = (unsigned int)val2 << 2;
   for (int ii = 10; ii >= 0; ii--)
   {
-    digitalWrite(SDI, !!(dout & (1 << ii)));
-    digitalWrite(SII, !!(iout & (1 << ii)));
+    digitalWrite(PIN_SDI, !!(dout & (1 << ii)));
+    digitalWrite(PIN_SII, !!(iout & (1 << ii)));
     inBits <<= 1;
-    inBits |= digitalRead(SDO);
-    digitalWrite(SCI, HIGH);
-    digitalWrite(SCI, LOW);
+    inBits |= digitalRead(PIN_SDO);
+    digitalWrite(PIN_SCI, HIGH);
+    digitalWrite(PIN_SCI, LOW);
   }
-  return inBits >> 2;
+  uint8_t res = inBits >> 2;
+  HVSP_LOG(val1, val2, res)
+  return res;
 }
 
 void writeFuse(unsigned int fuse, byte val)
