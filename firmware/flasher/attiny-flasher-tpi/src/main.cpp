@@ -128,14 +128,12 @@
 // #define HVReset 9
 
 // used for storing a program file
-uint8_t data[16];          //program data
-
+uint8_t data[16]; //program data
 
 // used for various purposes
 unsigned long startTime;
 unsigned int timeout;
 boolean idChecked;
-
 
 // char HVP = 0;
 // char HVON = 0;
@@ -143,7 +141,8 @@ boolean idChecked;
 void setup()
 {
   // you cant increase this over 9600, it'll overrun the buffer
-  Serial.begin(SERIAL_BAUDRATE);
+  Serial.begin(BAUDRATE_IN);
+  SSerial.begin(BAUDRATE_OUT);
 
   TPI::start();
 
@@ -187,8 +186,10 @@ void loop()
   }
 
   // when ready, send ready signal '.' and wait
-  Serial.print(F("\n>"));
-  while (Serial.available() < 1) {}
+  Serial.println(F("Ready.."));
+  while (Serial.available() < 1)
+  {
+  }
 
   TPI::start();
 
@@ -206,7 +207,13 @@ void loop()
   {
   case 'r':
   case 'R':
-    QUICK_RES;
+    BUFFER_ON;
+    RESET_HIGH
+    _delay_ms(1);
+    RESET_LOW;
+    _delay_ms(10);
+    RESET_HIGH;
+    BUFFER_OFF;
     break;
 
   case 'D':
@@ -223,14 +230,14 @@ void loop()
     //   hvserial();
     //   break;
 
-  // case 'P':
-  //   if (!TPI::writeProgram())
-  //   {
-  //     startTime = millis();
-  //     while (millis() - startTime < 8000)
-  //       Serial.read(); // if exited due to error, disregard all other serial data
-  //   }
-  //   break;
+    // case 'P':
+    //   if (!TPI::writeProgram())
+    //   {
+    //     startTime = millis();
+    //     while (millis() - startTime < 8000)
+    //       Serial.read(); // if exited due to error, disregard all other serial data
+    //   }
+    //   break;
 
   case 'E':
     TPI::eraseChip();
