@@ -1,4 +1,5 @@
 #include "stk500.h"
+#include "debug.h"
 
 STK500::STK500(SoftwareSerial *serial)
 {
@@ -19,6 +20,7 @@ void STK500::avrisp()
     case CMND_STK_GET_SIGN_ON:
         if (getch() == CRC_EOP)
         {
+            SERIAL_OUT1("HELLO");
             SERIAL_OUTC((char)STK_INSYNC);
             SERIAL_OUTS(F("AVR ISP"));
             SERIAL_OUTC((char)STK_OK);
@@ -31,28 +33,36 @@ void STK500::avrisp()
         break;
 
     case CMND_STK_GET_PARAMETER:
-        get_version(getch());
+        {
+            char c = getch();
+            SERIAL_OUT("GET_PAR", c);
+            get_version(c);
+        }
         break;
 
     case CMND_STK_SET_DEVICE:
+        SERIAL_OUT1("SET_PAR");
         fill(20);
         set_parameters();
         empty_reply();
         break;
 
-    case CMND_STK_SET_DEVICE_EXT: 
+    case CMND_STK_SET_DEVICE_EXT:
+        SERIAL_OUT1("SET_PAR_EX");
         fill(getch() - 1);
         set_ext_parameters();
         empty_reply();
         break;
 
     case CMND_STK_ENTER_PROGMODE:
+        SERIAL_OUT1("PMODE");
         if (!programming)
             start_programming();
         empty_reply();
         break;
 
     case CMND_STK_LEAVE_PROGMODE:
+        SERIAL_OUT1("QUIT");
         error = 0;
         end_programming();
         empty_reply();
@@ -62,16 +72,19 @@ void STK500::avrisp()
     case CMND_STK_LOAD_ADDRESS:
         addr = getch();
         addr += getch() << 8;
+        SERIAL_OUT("SET_ADDR", addr);
         empty_reply();
         break;
 
     case CMND_STK_PROG_FLASH:
+        SERIAL_OUT1("PROG_FLASH");
         getch(); // low addr
         getch(); // high addr
         empty_reply();
         break;
 
     case CMND_STK_PROG_DATA:
+        SERIAL_OUT1("PROG_DATA");
         getch(); // data
         empty_reply();
         break;
@@ -85,6 +98,7 @@ void STK500::avrisp()
         break;
 
     case CMND_STK_UNIVERSAL:
+        SERIAL_OUT1("UNIV");
         universal();
         break;
 

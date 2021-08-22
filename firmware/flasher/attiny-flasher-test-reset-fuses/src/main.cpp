@@ -1,11 +1,24 @@
 #include <Arduino.h>
 #include "boards.h"
+
+#if defined(SW_SERIAL_ENABLE)
+#include <SoftwareSerial.h>
+SoftwareSerial *sserial = new SoftwareSerial(PIN_SERIAL_RX, PIN_SERIAL_TX);
+#endif
+
+#include "debug.h"
 #include "main.h"
 #define SERIAL_SPEED 9600
 
 void setup()
 {
   Serial.begin(SERIAL_SPEED);
+
+#ifdef SERIAL_DEBUG_ENABLE
+  sserial->begin(BAUDRATE_OUT);
+  sserial->listen();
+  sserial->println(F("Ready..."));
+#endif
 
   RESET_INIT;
   BUFFER_OFF;

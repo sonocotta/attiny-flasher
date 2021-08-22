@@ -2,17 +2,17 @@
 #define _BOARDS_H_
 
 // Connection with host PC (HW serial)
-#define BAUDRATE_IN 115200
+#define BAUDRATE_IN 115200 // 19200
 // Connection with target MCU (SW serial)
 #define BAUDRATE_OUT 115200
 
 // ======= REVISION CAPABILITES DEFINITION ============
 
-#if defined(FLASHER_REV_C) 
+#if defined(FLASHER_REV_C)
 #define BUF_74HC125D
 // Tiny-linked Serial pins
 #define PIN_SERIAL_RX 5
-#define PIN_SERIAL_TX 4
+#define PIN_SERIAL_TX 4 // sometimes 2
 #endif
 
 #if defined(FLASHER_REV_D)
@@ -20,20 +20,22 @@
 // Tiny-linked Serial pins
 #define PIN_SERIAL_RX 4
 #define PIN_SERIAL_TX 5
-#endif
-
-#ifdef FLASHER_REV_E
-#define REV_D_TWO_PIN_RESET
 #define SERIAL_SENSOR_EN
 #define SERIAL_SENSOR_PIN A3
-#define RESET_SENSOR_EN
+#endif
+
+#if defined(FLASHER_REV_E) || defined(FLASHER_REV_F)
+#define REV_D_TWO_PIN_RESET
+#define HVSP_PROGRAMMER 
+#define SERIAL_SENSOR_EN
+#define SERIAL_SENSOR_PIN A3
 #define BUF_74HC241
 // Tiny-linked Serial pins
 #define PIN_SERIAL_RX 4
 #define PIN_SERIAL_TX 5
 
 // ============== RESET MODES DEFINITION ==============
-
+#define RESET_SENSOR_EN
 #define RESET_SENSOR_PIN 2
 #define RESET_SENSOR_WRITE(X)          \
     pinMode(RESET_SENSOR_PIN, OUTPUT); \
@@ -42,71 +44,91 @@
     pinMode(RESET_SENSOR_PIN, INPUT);
 #endif
 
+#ifdef MEGAFLASHER_REV_F
+#define MEGAFLASHER
+#define BUF_74HC125D
+// Tiny-linked Serial pins
+#define PIN_SERIAL_RX 4
+#define PIN_SERIAL_TX 5
+#define SERIAL_SENSOR_EN
+#define SERIAL_SENSOR_PIN A3
+#endif
+
 #define RESET 10 // Use pin 10 to reset the target rather than SS
 #if defined(REV_D_TWO_PIN_RESET)
 #define RESET_PULL A2 // Need another pin to pull it down properly
 #endif
 
-#define PIN_BUFEN 6 // Enable output buffer, active HIGH on 74HC126D, active LOW on 74HC125D
+// Enable output buffer, active HIGH on 74HC126D, active LOW on 74HC125D
+#if defined(FLASHER_REV_F) || defined(MEGAFLASHER_REV_F) 
+#define PIN_BUFEN A1
+#else
+#define PIN_BUFEN 6
+#endif
+
 #ifdef BUF_74HC126D
-#define BUFFER_HV_PROG ;
-#define BUFFER_INIT             \
+#define _BUFFER_HV_PROG ;
+#define _BUFFER_INIT             \
     pinMode(PIN_BUFEN, OUTPUT); \
-#define BUFFER_ON           \
+#define _BUFFER_ON           \
         digitalWrite(PIN_BUFEN, HIGH);
-#define BUFFER_OFF \
+#define _BUFFER_OFF \
     digitalWrite(PIN_BUFEN, LOW);
 #endif
+
 #ifdef BUF_74HC125D
-#define BUFFER_HV_PROG ;
-#define BUFFER_INIT \
+#define _BUFFER_HV_PROG ;
+#define _BUFFER_INIT \
     pinMode(PIN_BUFEN, OUTPUT);
-#define BUFFER_ON \
+#define _BUFFER_ON \
     digitalWrite(PIN_BUFEN, LOW);
-#define BUFFER_OFF \
+#define _BUFFER_OFF \
     digitalWrite(PIN_BUFEN, HIGH);
 #endif
+
 #ifdef BUF_74HC241
-#define BUFFER_HV_PROG          \
+#define _BUFFER_HV_PROG          \
     pinMode(PIN_BUFEN, OUTPUT); \
     digitalWrite(PIN_BUFEN, LOW);
-#define BUFFER_INIT ;
-#define BUFFER_ON               \
+#define _BUFFER_INIT ;
+#define _BUFFER_ON               \
     pinMode(PIN_BUFEN, OUTPUT); \
     digitalWrite(PIN_BUFEN, HIGH);
-#define BUFFER_OFF pinMode(PIN_BUFEN, INPUT);
+#define _BUFFER_OFF \
+    pinMode(PIN_BUFEN, INPUT);
 #endif
 
 #if defined(REV_D_TWO_PIN_RESET)
-#define RESET_INIT          \
+#define _RESET_INIT          \
     pinMode(RESET, OUTPUT); \
     pinMode(RESET_PULL, OUTPUT);
-#define RESET_HIGH_12              \
+#define _RESET_HIGH_12              \
     RESET_SENSOR_WRITE(HIGH);      \
     digitalWrite(RESET_PULL, LOW); \
     digitalWrite(RESET, HIGH);
-#define RESET_HIGH                 \
+#define _RESET_HIGH                 \
     RESET_SENSOR_WRITE(LOW);       \
     digitalWrite(RESET_PULL, LOW); \
     digitalWrite(RESET, HIGH);
-#define RESET_LOW                   \
+#define _RESET_LOW                   \
     digitalWrite(RESET, LOW);       \
     digitalWrite(RESET_PULL, HIGH); \
     RESET_SENSOR_WRITE(LOW);
-#define RESET_Z                    \
+#define _RESET_Z                    \
     digitalWrite(RESET_PULL, LOW); \
     digitalWrite(RESET, LOW);      \
     RESET_SENSOR_READ;
 #else
-#define RESET_INIT ;
-#define RESET_HIGH_12 ;
-#define RESET_HIGH          \
+#define _RESET_INIT ;
+#define _RESET_HIGH_12 ;
+#define _RESET_HIGH         \
     pinMode(RESET, OUTPUT); \
     digitalWrite(RESET, HIGH);
-#define RESET_LOW           \
+#define _RESET_LOW          \
     pinMode(RESET, OUTPUT); \
     digitalWrite(RESET, LOW);
-#define RESET_Z pinMode(RESET, INPUT); // high impedance state
+#define _RESET_Z \
+    pinMode(RESET, INPUT);
 #endif
 
 // ======= INDICATION PINS ============================

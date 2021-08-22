@@ -25,8 +25,6 @@ void ISP::start_programming()
     SPI.begin();
     SPI.beginTransaction(SPISettings(SPI_CLOCK, MSBFIRST, SPI_MODE0));
 
-    // See AVR datasheets, chapter "SERIAL_PRG Programming Algorithm":
-
     // Pulse RESET after PIN_SCK is low:
     digitalWrite(PIN_SCK, LOW);
     _delay_ms(20); // discharge PIN_SCK, value arbitrarily chosen
@@ -112,6 +110,7 @@ void ISP::write_flash_pages(int length)
 {
     int x = 0;
     unsigned int page = current_page();
+    SERIAL_OUT3("WRITE_FP", page, length);
     while (x < length)
     {
         if (page != current_page())
@@ -127,9 +126,10 @@ void ISP::write_flash_pages(int length)
     commit(page);
 }
 
-// write (length) bytes, (start) is a byte address
 void ISP::write_eeprom_chunk(unsigned int start, unsigned int length)
 {
+    SERIAL_OUT3("WRITE_EC", start, length);
+    // write (length) bytes, (start) is a byte address
     // this writes byte-by-byte, page writing may be faster (4 bytes at a time)
     fill(length);
     for (unsigned int x = 0; x < length; x++)
@@ -143,10 +143,13 @@ void ISP::write_eeprom_chunk(unsigned int start, unsigned int length)
 void ISP::program_page()
 {
     uint16_t length = (getch() << 8) | getch();
+    uint16_t start = 0;
     char memtype = getch();
+    uint16_t remaining = 0;
     switch (memtype)
     {
     case 'F':
+        SERIAL_OUT("WRITE_F", length);
         fill(length);
         if (CRC_EOP == getch())
         {
@@ -162,9 +165,10 @@ void ISP::program_page()
         break;
 
     case 'E':
+        SERIAL_OUT("WRITE_E", length);
         // addr is a word address, get the byte address
-        uint16_t start = addr * 2;
-        uint16_t remaining = length;
+        start = addr << 1;
+        remaining = length;
         if (length > param.eepromsize)
         {
             error++;
@@ -219,9 +223,11 @@ void ISP::read_page()
     }
     SERIAL_OUTC((char)STK_INSYNC);
 
+    int start = 0;
     switch (memtype)
     {
     case 'F':
+        SERIAL_OUT("READ_F", length);
         for (int x = 0; x < length; x += 2)
         {
             uint8_t low = flash_read(0x0, addr);
@@ -234,7 +240,8 @@ void ISP::read_page()
         break;
 
     case 'E':
-        int start = addr * 2;
+        SERIAL_OUT("READ_E", length);
+        start = addr << 1;
         for (int x = 0; x < length; x++)
         {
             int addr = start + x;
@@ -252,6 +259,7 @@ void ISP::read_page()
 
 void ISP::read_signature()
 {
+    SERIAL_OUT1("READ_SIGN");
     if (CRC_EOP != getch())
     {
         error++;

@@ -5,6 +5,8 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <SoftwareSerial.h>
+#include "boards.h"
+#include "debug.h"
 
 // Command definitions
 #define CMND_STK_GET_SYNC 0x30
@@ -49,11 +51,7 @@
 #define SWMAJ 1
 #define SWMIN 18
 
-#define BUFFER_SIZE 128 // 256
-
-#ifdef SERIAL_PORT_USBVIRTUAL
-#define Serial SERIAL_PORT_USBVIRTUAL
-#endif
+#define BUFFER_SIZE 256
 
 typedef struct param
 {
@@ -113,68 +111,6 @@ private:
     void set_ext_parameters();
 };
 
-#ifdef SERIAL_DEBUG_ENABLE
-#define LOG_CMD_IN(x)             \
-    {                             \
-        sserial->print("< 0x");   \
-        sserial->println(x, HEX); \
-    }
-#ifdef SERIAL_DEBUG_SPI_ENABLE
-#define SPI_LOG(x)                \
-    {                             \
-        sserial->print("S ");     \
-        sserial->print(addr);     \
-        sserial->print(" 0x");    \
-        sserial->println(x, HEX); \
-    }
-#define HVSP_LOG(x, y, z)         \
-    {                             \
-        sserial->print("H");      \
-        sserial->print(" 0x");    \
-        sserial->print(x, HEX);   \
-        sserial->print(" 0x");    \
-        sserial->print(y, HEX);   \
-        sserial->print(" 0x");    \
-        sserial->println(z, HEX); \
-    }
-#else
-#define SPI_LOG(x) ;
-#define HVSP_LOG(x, y, z) ;
-#endif
 
-#define SERIAL_OUTC(x)            \
-    {                             \
-        Serial.print(x);          \
-        sserial->print("> 0x");   \
-        sserial->println(x, HEX); \
-    }
-#define SERIAL_OUTS(x)        \
-    {                         \
-        Serial.print(x);      \
-        sserial->print("> "); \
-        sserial->println(x);  \
-    }
-#define SERIAL_OUT(s, x)     \
-    {                        \
-        sserial->print(s);   \
-        sserial->print(' '); \
-        sserial->println(x); \
-    }
-#else
-#define LOG_CMD_IN(x)
-#define SPI_LOG(x)
-#define SERIAL_OUTC(x)   \
-    {                    \
-        Serial.print(x); \
-    }
-#define SERIAL_OUTS(x)   \
-    {                    \
-        Serial.print(x); \
-    }
-#define SERIAL_OUT(s, x) ;
-
-#define SPI_LOG(x) ;
-#define HVSP_LOG(x, y, z) ;
-#endif
 
 #endif

@@ -25,9 +25,9 @@ void pins_lv_flash() {
 void setup() {
   Serial.begin(BAUDRATE_OUT);
 
-  BUFFER_INIT;
-  RESET_INIT;
-  RESET_Z;
+  _BUFFER_INIT;
+  _RESET_INIT;
+  _RESET_Z;
 
   pinMode(LED_HB, OUTPUT);
   pinMode(LED_ERR, OUTPUT);
@@ -59,8 +59,8 @@ void loop()
   uint8_t _state = state++ % STATES_CNT;
   switch (_state) {
     case 0:
-      BUFFER_OFF
-      RESET_Z
+      _BUFFER_OFF
+      _RESET_Z
       digitalWrite(LED_PMODE, HIGH);
       digitalWrite(LED_ERR, LOW);
       digitalWrite(LED_HB, LOW);
@@ -70,8 +70,8 @@ void loop()
 
     case 1:
       pins_lv_flash();
-      BUFFER_ON
-      RESET_LOW
+      _BUFFER_ON
+      _RESET_LOW
 
       digitalWrite(LED_PMODE, LOW);
       digitalWrite(LED_ERR, HIGH);
@@ -82,8 +82,8 @@ void loop()
 
     case 2:
       pins_lv_flash();
-      BUFFER_ON
-      RESET_HIGH
+      _BUFFER_ON
+      _RESET_HIGH
 
       digitalWrite(LED_PMODE, LOW);
       digitalWrite(LED_ERR, HIGH);
@@ -94,8 +94,8 @@ void loop()
 
     case 3: 
       pins_hv_flash();
-      BUFFER_HV_PROG
-      RESET_LOW
+      _BUFFER_HV_PROG
+      _RESET_LOW
 
       digitalWrite(LED_PMODE, LOW);
       digitalWrite(LED_ERR, LOW);
@@ -106,8 +106,8 @@ void loop()
 
     case 4: 
       pins_hv_flash();
-      BUFFER_HV_PROG
-      RESET_HIGH_12
+      _BUFFER_HV_PROG
+      _RESET_HIGH_12
 
       digitalWrite(LED_PMODE, LOW);
       digitalWrite(LED_ERR, LOW);

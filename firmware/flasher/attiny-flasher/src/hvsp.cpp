@@ -445,7 +445,7 @@ uint8_t HVSP::read_flash_high_byte()
 
 void HVSP::write_flash_page()
 {
-    SERIAL_OUT("FP", flash_page);
+    //SERIAL_OUT("FP", flash_page);
     transfer(flash_page, 0x1C);
     transfer(0x00, 0x64);
     transfer(0x00, 0x6C);

@@ -9,9 +9,10 @@
 
 #if defined(SW_SERIAL_ENABLE)
 #include <SoftwareSerial.h>
-SoftwareSerial* SSerial = NULL;
-#undef SERIAL
+SoftwareSerial *sserial;
 #endif
+
+#include "debug.h"
 
 #ifdef OLED_ENABLE
   // Screen settings

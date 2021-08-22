@@ -2,7 +2,6 @@
 #define _ISP_H_
 
 #include "stk500.h"
-#include "boards.h"
 
 #define PROG_FLICKER true
 #define PULSE_TIME 10
@@ -16,18 +15,6 @@
 //
 // A clock slow enough for an ATtiny85 @ 1 MHz, is a reasonable default:
 #define SPI_CLOCK (1000000 / 6)
-
-// Configure the serial port to use.
-//
-// Prefer the USB virtual serial port (aka. native USB port), if the Arduino has one:
-//   - it does not autoreset (except for the magic baud rate of 1200).
-//   - it is more reliable because of USB handshaking.
-//
-// Leonardo and similar have an USB virtual serial port: 'Serial'.
-// Due and Zero have an USB virtual serial port: 'SerialUSB'.
-//
-// On the Due and Zero, 'Serial' can be used too, provided you disable autoreset.
-// To use 'Serial': #define SERIAL Serial
 
 class ISP : public STK500
 {
