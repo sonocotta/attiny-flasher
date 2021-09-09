@@ -364,7 +364,7 @@ void displayString(LedControl &lc, const char *str, int addr, unsigned long wait
     StrD(str).displayString(lc, addr, wait, scroll, rotate);
 }
 
-const char texte[] PROGMEM = "\200\201";
+const char texte[] PROGMEM = "Hello, World!";
 
 void setup()
 {

@@ -1,5 +1,6 @@
 #include <SPI.h>
 #include "tpi.h"
+#include "boards.h"
 
 // represents the current pointer register value
 unsigned short adrs = 0x0000;
@@ -14,7 +15,7 @@ void TPI::start()
     SPI.setClockDivider(SPI_CLOCK_DIV32);
 
     // enter TPI programming mode
-    RESET_LOW;
+    _RESET_LOW;
 
     // digitalWrite(SS, LOW); // assert RESET on tiny
     delay(1); // t_RST min = 400 ns @ Vcc = 5 V
@@ -26,9 +27,11 @@ void TPI::start()
     writeCSS(0x02, 0x04); // TPIPCR, guard time = 8bits (default=128)
 
     send_skey(NVM_PROGRAM_ENABLE); // enable NVM interface
+    
     // wait for NVM to be enabled
     while ((readCSS(0x00) & 0x02) < 1)
     {
+        _delay_ms(500);
     }
 
     // initialize memory pointer register
@@ -516,7 +519,7 @@ void TPI::finish()
     writeCSS(0x00, 0x00);
     SPI.transfer(0xff);
     SPI.transfer(0xff);
-    RESET_HIGH;
+    _RESET_HIGH;
     //  digitalWrite(SS, HIGH); // release RESET
     delay(1); // t_RST min = 400 ns @ Vcc = 5 V
     SPI.end();

@@ -142,10 +142,20 @@ void setup()
 {
   // you cant increase this over 9600, it'll overrun the buffer
   Serial.begin(BAUDRATE_IN);
-  SSerial.begin(BAUDRATE_OUT);
+  sserial->begin(BAUDRATE_OUT);
 
+  Serial.println('>');
+
+  BUFFER_INIT;
+  
+  // RESET TARGET
+  RESET_INIT;
+  // RESET_LOW;
+  // _delay_ms(50);
+  // RESET_Z;
+
+  BUFFER_ON;
   TPI::start();
-
   // pinMode(HVReset, OUTPUT);
 
   timeout = 20000;

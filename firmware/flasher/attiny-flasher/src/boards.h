@@ -18,8 +18,8 @@
 #if defined(FLASHER_REV_D)
 #define BUF_74HC125D
 // Tiny-linked Serial pins
-#define PIN_SERIAL_RX 4
-#define PIN_SERIAL_TX 5
+#define PIN_SERIAL_RX 5
+#define PIN_SERIAL_TX 4
 #define SERIAL_SENSOR_EN
 #define SERIAL_SENSOR_PIN A3
 #endif
@@ -31,8 +31,8 @@
 #define SERIAL_SENSOR_PIN A3
 #define BUF_74HC241
 // Tiny-linked Serial pins
-#define PIN_SERIAL_RX 4
-#define PIN_SERIAL_TX 5
+#define PIN_SERIAL_RX 5
+#define PIN_SERIAL_TX 4
 
 // ============== RESET MODES DEFINITION ==============
 #define RESET_SENSOR_EN
@@ -54,7 +54,7 @@
 #define SERIAL_SENSOR_PIN A3
 #endif
 
-#define RESET 10 // Use pin 10 to reset the target rather than SS
+#define RESET 10
 #if defined(REV_D_TWO_PIN_RESET)
 #define RESET_PULL A2 // Need another pin to pull it down properly
 #endif
@@ -137,6 +137,10 @@
 #define LED_HB 9    // Heartbeat
 #define LED_ERR 8   // Error
 #define LED_PMODE 7 // Programm
+
+#if defined(OLED_LIB_ADAFRUIT) || defined(OLED_LIB_TINY)
+#define OLED_ENABLE
+#endif
 
 // ============== PIN MODES DEFINITION ==============
 

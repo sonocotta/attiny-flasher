@@ -56,6 +56,12 @@ SERIAL_OUT1("? OLED -> OFF");
 #endif
 
   BUFFER_INIT;
+  
+  // RESET TARGET
+  RESET_INIT;
+  RESET_LOW;
+  _delay_ms(50);
+  RESET_Z;
 
   pinMode(LED_PMODE, OUTPUT);
   pulse(LED_PMODE, 2);

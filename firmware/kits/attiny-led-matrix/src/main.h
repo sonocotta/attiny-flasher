@@ -6,6 +6,10 @@
 #define PIN_LED_CLK    2
 #define PIN_LED_CS     1
 #define PIN_LED_DATA   0
+
+#define PIN_BTN_A   3
+#define PIN_BTN_B   4
+
 #define LED_MATRIX_CNT 4
 
 LedControl lc = LedControl(PIN_LED_DATA, PIN_LED_CLK, PIN_LED_CS, LED_MATRIX_CNT);

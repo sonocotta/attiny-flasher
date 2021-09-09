@@ -38,6 +38,9 @@ SoftwareSerial mySerial(PIN_RX, PIN_TX);
 #define Serial mySerial
 #endif
 
+#define ON_TIME_MS 500
+#define OFF_TIME_MS 250
+
 void setup() {
   for (uint8_t i = 0; i < PINS_COUNT; i++)
     pinMode(START_PIN + i, OUTPUT);
@@ -63,12 +66,12 @@ uint8_t state = 0;
 void loop() {
   uint8_t pinNumber = state++ % PINS_COUNT;
   digitalWrite(START_PIN + pinNumber, HIGH);
-  _delay_ms(250);
+  _delay_ms(ON_TIME_MS);
   digitalWrite(START_PIN + pinNumber, LOW);
   
   #ifdef SERIAL_EN
   Serial.println(millis());
   #endif
   
-  _delay_ms(250);
+  _delay_ms(OFF_TIME_MS);
 }

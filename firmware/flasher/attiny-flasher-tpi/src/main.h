@@ -1,4 +1,5 @@
 #include "boards.h"
+#include "debug.h"
 
 // see functions below ////////////////////////////////
 // SIN  0b0aa1aaaa replace a with 6 address bits
@@ -10,7 +11,7 @@
 #if defined(SW_SERIAL_ENABLE)
 #define SW_SERIAL_TX 2
 #include <SoftwareSerial.h>
-SoftwareSerial SSerial(-1, SW_SERIAL_TX);
+SoftwareSerial* sserial = new SoftwareSerial(-1, SW_SERIAL_TX);
 #undef SERIAL
 #endif
 

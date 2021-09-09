@@ -28,8 +28,8 @@
 #define HexError 2
 #define TooLarge 3
 
-#define RESET_HIGH digitalWrite(SS, HIGH);
-#define RESET_LOW digitalWrite(SS, LOW);
+// #define RESET_HIGH digitalWrite(SS, HIGH);
+// #define RESET_LOW digitalWrite(SS, LOW);
 
 class TPI
 {
