@@ -1,0 +1,1 @@
+../../attiny-flasher/src/stk500.h

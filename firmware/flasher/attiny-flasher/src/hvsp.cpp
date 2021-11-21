@@ -18,7 +18,7 @@ void HVSP::start_programming()
     RESET_HIGH_12;
     _delay_ms(25);
     RESET_Z;
-    
+
     BUFFER_HV_PROG;
     SETUP_PINS_HVSP_INIT;
     RESET_LOW;
@@ -119,7 +119,7 @@ void HVSP::write_flash_pages(int len)
     //     SERIAL_OUT("A", addr);
     //     load_flash_page_low_byte(getch());
     //     load_flash_page_high_byte(getch());
-        
+
     //     addr++;
     //     if (!(addr & pageMask))
     //         write_flash_page();
@@ -266,7 +266,7 @@ uint8_t HVSP::transfer(uint8_t data, uint8_t cmd)
 {
     uint8_t result = 0;
     // wait chip ready
-    while (!HVSP_SDO_STATE)
+    while (!(HVSP_SDO_STATE))
         ;
     // start bits
     HVSP_SDI_LOW;
@@ -295,27 +295,6 @@ uint8_t HVSP::transfer(uint8_t data, uint8_t cmd)
     HVSP_LOG(data, cmd, result)
     return result;
 }
-
-// uint8_t HVSP::transfer(uint8_t val1, uint8_t val2)
-// {
-//     int inBits = 0;
-//     while (!digitalRead(PIN_SDO))
-//         ;
-//     unsigned int dout = (unsigned int)val1 << 2;
-//     unsigned int iout = (unsigned int)val2 << 2;
-//     for (int ii = 10; ii >= 0; ii--)
-//     {
-//         digitalWrite(PIN_SDI, !!(dout & (1 << ii)));
-//         digitalWrite(PIN_SII, !!(iout & (1 << ii)));
-//         inBits <<= 1;
-//         inBits |= digitalRead(PIN_SDO);
-//         digitalWrite(PIN_SCI, HIGH);
-//         digitalWrite(PIN_SCI, LOW);
-//     }
-//     uint8_t res = inBits >> 2;
-//     HVSP_LOG(val1, val2, res)
-//     return res;
-// }
 
 void HVSP::clock_pulse()
 {

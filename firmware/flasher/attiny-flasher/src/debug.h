@@ -6,21 +6,26 @@
         sserial = new SoftwareSerial(PIN_SERIAL_RX, PIN_SERIAL_TX); \
     sserial->begin(BAUDRATE_OUT);                                   \
     sserial->listen();
-#endif
 
-#define _SSERIAL_DEINIT  \
-    if (sserial != NULL) \
-        sserial->end();
+#define _SSERIAL_DEINIT                \
+    if (sserial != NULL)               \
+    {                                  \
+        sserial->end();                \
+        delete (sserial);              \
+        sserial = NULL;                \
+        pinMode(PIN_SERIAL_RX, INPUT); \
+        pinMode(PIN_SERIAL_TX, INPUT); \
+    }
 
 #ifdef SERIAL_DEBUG_ENABLE
-#define LOG_CMD_IN(x)            \
-    {                            \
-        if (sserial != NULL)     \
-        {                        \
-            sserial->print('<'); \
-            sserial->print(x, HEX);   \
-            sserial->print(' '); \
-        }                        \
+#define LOG_CMD_IN(x)               \
+    {                               \
+        if (sserial != NULL)        \
+        {                           \
+            sserial->print('<');    \
+            sserial->print(x, HEX); \
+            sserial->print(' ');    \
+        }                           \
     }
 #ifdef SERIAL_DEBUG_SPI_ENABLE
 #define SPI_LOG(x)                \
@@ -108,21 +113,25 @@
         SERIAL_OUT1("_RES_INIT"); \
         _RESET_INIT;              \
     }
+
 #define RESET_Z                  \
     {                            \
         SERIAL_OUT1("_RESET_Z"); \
         _RESET_Z;                \
     }
+
 #define RESET_HIGH                  \
     {                               \
         SERIAL_OUT1("_RESET_HIGH"); \
         _RESET_HIGH;                \
     }
+
 #define RESET_LOW                  \
     {                              \
         SERIAL_OUT1("_RESET_LOW"); \
         _RESET_LOW;                \
     }
+
 #define RESET_HIGH_12                  \
     {                                  \
         SERIAL_OUT1("_RESET_HIGH_12"); \
@@ -134,24 +143,44 @@
         SERIAL_OUT1("_BUFFER_INIT"); \
         _BUFFER_INIT;                \
     }
+
 #define BUFFER_ON                  \
     {                              \
         SERIAL_OUT1("_BUFFER_ON"); \
         _BUFFER_ON;                \
     }
+
 #define BUFFER_OFF                  \
     {                               \
         SERIAL_OUT1("_BUFFER_OFF"); \
         _BUFFER_OFF;                \
     }
+
 #define BUFFER_HV_PROG                  \
     {                                   \
         SERIAL_OUT1("_BUFFER_HV_PROG"); \
         _BUFFER_HV_PROG;                \
     }
+
+#define SETUP_PINS_HVSP_INIT \
+    {                                   \
+        SERIAL_OUT1("_SETUP_PINS_HVSP_INIT"); \
+        _SETUP_PINS_HVSP_INIT;                \
+    }
+
+#define SETUP_PINS_HVSP \
+    {                                   \
+        SERIAL_OUT1("_SETUP_PINS_HVSP"); \
+        _SETUP_PINS_HVSP;                \
+    }
+
 #define SSERIAL_INIT \
     _SSERIAL_INIT;   \
     sserial->println(F("Ready..."));
+
+#define SSERIAL_DEINIT               \
+    sserial->println(F("Stopping")); \
+    _SSERIAL_DEINIT;
 
 #else
 #define LOG_CMD_IN(x) ;
@@ -183,7 +212,10 @@
 #define BUFFER_HV_PROG _BUFFER_HV_PROG
 
 #define SSERIAL_INIT _SSERIAL_INIT
+#define SSERIAL_DEINIT _SSERIAL_DEINIT
+
+#define SETUP_PINS_HVSP_INIT _SETUP_PINS_HVSP_INIT
+#define SETUP_PINS_HVSP _SETUP_PINS_HVSP
 
 #endif
-
-#define SSERIAL_DEINIT _SSERIAL_DEINIT
+#endif

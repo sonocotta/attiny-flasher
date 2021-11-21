@@ -22,7 +22,10 @@ void setup()
   {
     SSERIAL_INIT;
     SERIAL_OUT1("? SERIAL MODE -> ON");
-  } else {
+  }
+  else
+  {
+    SSERIAL_DEINIT;
     SERIAL_OUT1("? SERIAL MODE -> OFF");
   }
 
@@ -38,25 +41,25 @@ void setup()
 #else
   hvsp = new HVSP();
 #endif
-SERIAL_OUT1("? HV PROG -> ON");
-#else 
-SERIAL_OUT1("? HV PROG -> OFF");
+  SERIAL_OUT1("? HV PROG -> ON");
+#else
+  SERIAL_OUT1("? HV PROG -> OFF");
 #endif
 
 #ifdef SERIAL_BRIDGE_ENABLE
-SERIAL_OUT1("? SERIAL BR -> ON");
-#else 
-SERIAL_OUT1("? SERIAL BR -> OFF");
+  SERIAL_OUT1("? SERIAL BR -> ON");
+#else
+  SERIAL_OUT1("? SERIAL BR -> OFF");
 #endif
 
 #ifdef OLED_ENABLE
-SERIAL_OUT1("? OLED -> ON");
+  SERIAL_OUT1("? OLED -> ON");
 #else
-SERIAL_OUT1("? OLED -> OFF");
+  SERIAL_OUT1("? OLED -> OFF");
 #endif
 
   BUFFER_INIT;
-  
+
   // RESET TARGET
   RESET_INIT;
   RESET_LOW;
@@ -107,34 +110,67 @@ int8_t hv_mode = -1;
 
 uint8_t ser_state_cnt = 0;
 int8_t ser_mode = -1;
+bool last_prog_mode = false;
 
 void loop(void)
 {
 #if defined(SERIAL_SENSOR_EN)
-  // take measurment each 255th time
+  // check if in prog mode, since sserial blocks communication in hvsp mode
+//   bool cur_prog_mode = false;
+//   if (hv_mode)
+//   {
+// #if defined(HVSP_PROGRAMMER)
+//     cur_prog_mode = hvsp->programming;
+// #endif
+//   }
+  // else // sserial is not interferring with ISP programmer
+  // {
+  //   cur_prog_mode = isp->programming;
+  // }
+
+  // if (cur_prog_mode != last_prog_mode)
+  // {
+  //   if (cur_prog_mode)
+  //   {
+  //     SERIAL_OUT1("PROG MODE -> ON, SERIAL MODE -> OFF");
+  //     SSERIAL_DEINIT;
+  //     ser_mode = -1;
+  //   }
+  //   else
+  //   {
+  //     SERIAL_OUT1("PROG MODE -> OFF");
+  //   }
+  //   last_prog_mode = cur_prog_mode;
+  // }
+
+  // if (!cur_prog_mode)
+  // {
+    // take measurment each 255th time
     if (++ser_state_cnt == 0)
     {
       uint8_t _ser_mode = digitalRead(SERIAL_SENSOR_PIN);
       if (ser_mode != _ser_mode)
       {
-        if (_ser_mode == HIGH) {
+        if (_ser_mode == HIGH)
+        {
           SERIAL_OUT1("SERIAL MODE -> OFF");
           SSERIAL_DEINIT;
         }
-        if (_ser_mode == LOW) {
-          SERIAL_OUT1("SERIAL MODE -> ON");
+        if (_ser_mode == LOW)
+        {
           SSERIAL_INIT;
+          SERIAL_OUT1("SERIAL MODE -> ON");
         }
         ser_mode = _ser_mode;
       }
     }
+  // }
 #else
   if (ser_mode == -1)
   {
     ser_mode = 0;
   }
 #endif
-
 
 #if defined(RESET_SENSOR_EN) && defined(HVSP_PROGRAMMER)
   if (!(hv_mode && hvsp->reset_locked) || (!hv_mode && isp->reset_locked))
@@ -147,10 +183,12 @@ void loop(void)
       if (hv_mode != _hv_mode)
       {
         SERIAL_OUT("HV MODE -> ", _hv_mode);
-        if (_hv_mode == HIGH) {
+        if (_hv_mode == HIGH)
+        {
           hvsp->init();
         }
-        if (_hv_mode == LOW) {
+        if (_hv_mode == LOW)
+        {
           isp->init();
         }
         hv_mode = _hv_mode;
@@ -167,7 +205,7 @@ void loop(void)
 
   if (hv_mode)
   {
-#if defined(HVSP_PROGRAMMER) 
+#if defined(HVSP_PROGRAMMER)
     digitalWrite(LED_PMODE, hvsp->programming ? HIGH : LOW);
     digitalWrite(LED_ERR, hvsp->error ? HIGH : LOW);
     digitalWrite(LED_HB, (millis() % 256) < 4 ? HIGH : LOW);
@@ -295,29 +333,32 @@ void logo_show(Ssd1306 *display)
 
   display->setTextSize(1);
   display->setCursor(72, 0);
-  #ifdef MEGAFLASHER
+#ifdef MEGAFLASHER
   display->print(F("MEGA"));
-  #else
+#else
   display->print(F("ATTINY"));
-  #endif
+#endif
   display->setCursor(72, 16);
   display->print(F("FLASHER"));
   display->setCursor(72, 32);
-  #ifdef FLASHER_REV_C
+#ifdef FLASHER_REV_C
   display->print(F("Rev.C by"));
-  #endif
-  #ifdef FLASHER_REV_D
+#endif
+#ifdef FLASHER_REV_D
   display->print(F("Rev.D by"));
-  #endif
-  #ifdef FLASHER_REV_E
+#endif
+#ifdef FLASHER_REV_E
   display->print(F("Rev.E by"));
-  #endif
-  #ifdef FLASHER_REV_F
+#endif
+#ifdef FLASHER_REV_F
   display->print(F("Rev.F by"));
-  #endif
-  #ifdef MEGAFLASHER_REV_F
+#endif
+#ifdef FLASHER_REV_G
+  display->print(F("Rev.G by"));
+#endif
+#ifdef MEGAFLASHER_REV_F
   display->print(F("Rev.F by"));
-  #endif
+#endif
   display->setCursor(72, 48);
   display->print(F("SONOCOTTA"));
   display->display();
@@ -329,29 +370,32 @@ void logo_show(Ssd1306 *display)
   display->clear();
   display->bitmap(0, 0, LOGO_BMPWIDTH, 8, bitmap_logo);
   display->setCursor(72, 0);
-  #ifdef MEGAFLASHER
+#ifdef MEGAFLASHER
   display->print(F("MEGA"));
-  #else
+#else
   display->print(F("ATTINY"));
-  #endif
+#endif
   display->setCursor(72, 2);
   display->print(F("FLASHER"));
   display->setCursor(72, 4);
-  #ifdef FLASHER_REV_C
+#ifdef FLASHER_REV_C
   display->print(F("Rv.C by"));
-  #endif
-  #ifdef FLASHER_REV_D
+#endif
+#ifdef FLASHER_REV_D
   display->print(F("Rv.D by"));
-  #endif
-  #ifdef FLASHER_REV_E
+#endif
+#ifdef FLASHER_REV_E
   display->print(F("Rv.E by"));
-  #endif
-  #ifdef FLASHER_REV_F
+#endif
+#ifdef FLASHER_REV_F
   display->print(F("Rv.F by"));
-  #endif
-  #ifdef MEGAFLASHER_REV_F
+#endif
+#ifdef FLASHER_REV_G
+  display->print(F("Rv.G by"));
+#endif
+#ifdef MEGAFLASHER_REV_F
   display->print(F("Rv.F by"));
-  #endif
+#endif
   display->setCursor(56, 6);
   display->print(F("SONOCOTTA"));
   display->on();

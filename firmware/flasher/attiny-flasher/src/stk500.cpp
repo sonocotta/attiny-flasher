@@ -20,6 +20,7 @@ void STK500::avrisp()
     case CMND_STK_GET_SIGN_ON:
         if (getch() == CRC_EOP)
         {
+            SSERIAL_DEINIT;
             SERIAL_OUT1("HELLO");
             SERIAL_OUTC((char)STK_INSYNC);
             SERIAL_OUTS(F("AVR ISP"));

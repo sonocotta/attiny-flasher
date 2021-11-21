@@ -8,11 +8,22 @@ SoftwareSerial *sserial = new SoftwareSerial(PIN_SERIAL_RX, PIN_SERIAL_TX);
 
 #include "debug.h"
 #include "main.h"
-#define SERIAL_SPEED 9600
 
 void setup()
 {
-  Serial.begin(SERIAL_SPEED);
+  Serial.begin(BAUDRATE_OUT);
+
+#ifdef FLASHER_REV_F
+  Serial.println("FLASHER_REV_F");
+#endif
+
+#ifdef FLASHER_REV_G
+  Serial.println("FLASHER_REV_G");
+#endif
+
+#ifdef REV_D_TWO_PIN_RESET
+  Serial.println("REV_D_TWO_PIN_RESET");
+#endif
 
 #ifdef SERIAL_DEBUG_ENABLE
   sserial->begin(BAUDRATE_OUT);
@@ -76,7 +87,7 @@ void loop()
     }
 
     readFuses();
-    
+
     digitalWrite(PIN_SCI, LOW);
     //digitalWrite(VCC, LOW); // Vcc Off
     //onOff = 0;              // 12v Off
@@ -89,8 +100,7 @@ byte shiftOut(byte val1, byte val2)
 {
   int inBits = 0;
   //Wait until SDO goes high
-  while (!digitalRead(PIN_SDO))
-    ;
+  while (!HVSP_SDO_STATE) ;
   unsigned int dout = (unsigned int)val1 << 2;
   unsigned int iout = (unsigned int)val2 << 2;
   for (int ii = 10; ii >= 0; ii--)
@@ -98,9 +108,9 @@ byte shiftOut(byte val1, byte val2)
     digitalWrite(PIN_SDI, !!(dout & (1 << ii)));
     digitalWrite(PIN_SII, !!(iout & (1 << ii)));
     inBits <<= 1;
-    inBits |= digitalRead(PIN_SDO);
-    digitalWrite(PIN_SCI, HIGH);
-    digitalWrite(PIN_SCI, LOW);
+    inBits |= HVSP_SDO_STATE;
+    HVSP_SCI_HIGH;
+    HVSP_SCI_LOW;
   }
   uint8_t res = inBits >> 2;
   HVSP_LOG(val1, val2, res)

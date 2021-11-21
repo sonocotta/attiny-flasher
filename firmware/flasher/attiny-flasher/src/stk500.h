@@ -80,8 +80,8 @@ public:
     bool serial_busy = false;
     bool programming = false;
     bool reset_locked = false;
-    bool error = false;
-
+    uint8_t error = 0;
+    
     void avrisp();
 
 protected:

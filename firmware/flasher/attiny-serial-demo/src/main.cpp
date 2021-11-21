@@ -33,7 +33,7 @@
 
 #ifdef SW_SERIAL
 #define PIN_RX -1
-#define PIN_TX 4
+#define PIN_TX 3
 SoftwareSerial mySerial(PIN_RX, PIN_TX);
 #define Serial mySerial
 #endif
