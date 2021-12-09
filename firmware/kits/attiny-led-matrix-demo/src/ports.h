@@ -1,0 +1,5 @@
+#define PIN_OUTPUT(pin) DDRB |= _BV(pin)
+#define PIN_INPUT(pin) DDRB &= ~_BV(pin)
+#define PIN_HIGH(pin) PORTB |= _BV(pin)
+#define PIN_LOW(pin) PORTB &= ~_BV(pin)
+#define PIN_READ(pin) (PINB & _BV(pin))

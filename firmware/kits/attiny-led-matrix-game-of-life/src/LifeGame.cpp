@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <Arduino.h>
 #include "LifeGame.h"
 #ifdef LIGHT_SERIAL
 #include <ATtinySerialOut.h>

@@ -1,10 +1,10 @@
 #include <DigiMouse.h>
-const int LED_PIN = 1;
+// const int LED_PIN = 1;
 const int SHIFT_PX = 5;
 
 void setup() {
   DigiMouse.begin();
-  pinMode(LED_PIN, OUTPUT);
+  // pinMode(LED_PIN, OUTPUT);
 }
 
 // void loop() {
