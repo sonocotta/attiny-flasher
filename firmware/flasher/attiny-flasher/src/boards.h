@@ -25,7 +25,7 @@
 #define SERIAL_SENSOR_PIN A3
 #endif
 
-#if defined(FLASHER_REV_E) || defined(FLASHER_REV_F) || defined(FLASHER_REV_G)
+#if defined(FLASHER_REV_E) || defined(FLASHER_REV_F) || defined(FLASHER_REV_G) || defined(FLASHER_REV_H)
 #define REV_D_TWO_PIN_RESET
 #define HVSP_PROGRAMMER
 #define SERIAL_SENSOR_EN
@@ -62,7 +62,7 @@
 #endif
 
 // Enable output buffer, active HIGH on 74HC126D, active LOW on 74HC125D
-#if defined(FLASHER_REV_F) || defined(FLASHER_REV_G) || defined(MEGAFLASHER_REV_F)
+#if defined(FLASHER_REV_F) || defined(FLASHER_REV_G) || defined(FLASHER_REV_H) || defined(MEGAFLASHER_REV_F) 
 #define PIN_BUFEN A1
 #else
 #define PIN_BUFEN 6

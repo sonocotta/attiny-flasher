@@ -356,6 +356,9 @@ void logo_show(Ssd1306 *display)
 #ifdef FLASHER_REV_G
   display->print(F("Rev.G by"));
 #endif
+#ifdef FLASHER_REV_H
+  display->print(F("Rev.H by"));
+#endif
 #ifdef MEGAFLASHER_REV_F
   display->print(F("Rev.F by"));
 #endif
@@ -392,6 +395,9 @@ void logo_show(Ssd1306 *display)
 #endif
 #ifdef FLASHER_REV_G
   display->print(F("Rv.G by"));
+#endif
+#ifdef FLASHER_REV_H
+  display->print(F("Rv.H by"));
 #endif
 #ifdef MEGAFLASHER_REV_F
   display->print(F("Rv.F by"));
