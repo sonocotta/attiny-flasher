@@ -39,6 +39,64 @@ For each project please find detailed description using links below
 - [attiny-rubber-ducky-mouse](/firmware/kits/attiny-rubber-ducky-mouse) - Mouse emulator demo  (Rubber Ducky project kit)
 - [attiny-traffic-light](/firmware/kits/attiny-traffic-light) - Traffic light demo firmware (Traffic Light project kit)
 
+## How to flash
+
+### Recomended: Using Platformio
+
+All firmware files in this repo are [Platformio](https://platformio.org/) projects. This is a preferred tool to be used together with ATtiny Flasher, since it generally hadles better than our beloved Arduino IDE
+- It doesn't require manual installation of new boards, it is enough to mention your board in the project configuration and Platformio will pull full framework automatically
+- Same goes for the required libraries, just list your dependencies in the project config, Platformio will pull the latest versions
+- It is a grown-up code editor, with the possibilities to look up for library sources and adding multiple source files to your project to create good structure.
+- It allows to fine-tune build and upload settings as well as many more parameters.
+
+To install Platformio simply add an extension to VS Code
+
+![Install Platformio](images/simplescreenrecorder-2022-01-28_21.06.11.mkv.gif)
+
+#### Flashing Kits using Platformio
+
+Simply open project in the Platformio IDE and run `Platformio: Build` and `Platformio: Upload` tasks. All the relevant settings can be found in `platformio.ini` file in the project folder.
+
+![Build and Upload using Platformio](images/simplescreenrecorder-2022-01-28_21.10.08.mkv.gif)
+
+#### Using Platformio to update Flasher firmware
+
+Open [attiny-flasher](/firmware/flasher/attiny-flasher) folder in Platformio IDE. Find in the Platformio panel your revision of the board (Single letter, usually G, H, J etc is printed in the back side of the PCB). Use the physical switch on the Flasher to select self-programming mode.
+
+![image](https://user-images.githubusercontent.com/5459747/151625041-69a9ba3b-d6de-430b-9e14-deacd8441501.png)
+
+Run `Upload` task.
+
+![Updating firmware using Platformio](images/simplescreenrecorder-2022-01-28_21.30.48.mkv.gif)
+
+### Using Arduino IDE
+
+All Flasher Kits are built on ATTINY85 MCU which is not supported by default in Arduino IDE. Therefore first you need to add ATTINY85 support to your Arduino IDe using board manager. Use this link json configuration
+```
+https://raw.githubusercontent.com/damellis/attiny/ide-1.6.x-boards-manager/package_damellis_attiny_index.json
+```
+
+![Adding ATTiny85 support to Arduino IDE](images/simplescreenrecorder-2022-01-28_21.14.22.mkv.gif)
+
+#### Flasher Configuration
+
+By default ATTiny Flasher would expect 115200 baudrate when programming Flasher Projects. Arduino IDE in turn uses 19200 baud rate for the same. This can be fixed by modifying Arduino IDE internal configs (which is not recomended) or by flashing Flasher with updated baud rate
+
+![Updating firmware using Platformio](images/simplescreenrecorder-2022-01-28_21.30.48.mkv.gif)
+
+After this is done you may use `Arduino as ISP` programmer in the Arduino IDE with no modifications.
+
+![Flashing using Arduino IDE](images/simplescreenrecorder-2022-01-28_21.32.04.mkv.gif)
+
+### Using avrdude
+
+If you prefer to flash Kits usging pure console, you can use `avrdude` with the proper configuration (similar to what Platformio does under the hood)
+
+Assuming you have built `firmware.hex` and your upload port to be `/dev/ttyUSB0`
+```
+avrdude -P/dev/ttyUSB0 -b115200 -v -p attiny85 -c stk500v1 -b 115200 -e -D -U flash:w:firmware.hex:i
+```
+
 ## Links
 
 - [Crowd Supply campaign](https://www.crowdsupply.com/sonocotta/attiny-flasher)
