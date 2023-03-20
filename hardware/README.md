@@ -32,7 +32,7 @@ This is hardware design files for ATtiny Flasher project
 |----|----|----|----|
 | 1 | Serial Bridge between Host and Target. When enabled Serial Data from TARGET MCU will be captured on the HOST MCU (115200 baud rate by default). It will be displayed on the OLED screen, also translated to PC via on-boarde Serial-to-USB chip. When enalbed it will pullup PB3 and PB4 ports on the TARGET, therefore might be required to be off | Enabled | Disabled |
 | 2 | High voltage programming. When ON it will use built in 12V boost converter to reset HOST MCU into high voltage programming mode. Using this method you can use PB5 port of ATTINY (normally not usable), however make sure that other components of your device can handle 12V during flashing process. | Low voltage, green status LED blink slowly. | High voltage, green status LED blink rapidly |
-| 3 | Programming target. When ON incoming Serial data will be interpretet as STK500 commands and translatred accordingly to TARGET MCU. When OFF it will allow to flash HOST MCU using Arduino bootloader (in other words like normal Atmega) | Flash HOST | Flash TARGET |
+| 3 | Programming target. When ON incoming Serial data will be interpretet as STK500 commands and translatred accordingly to TARGET MCU. When OFF it will allow to flash HOST MCU using Arduino bootloader (i.e. like any other Atmega) | Flash TARGET | Flash HOST |
 
 
 ## Board Revisions
