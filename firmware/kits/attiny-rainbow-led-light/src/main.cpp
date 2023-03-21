@@ -47,7 +47,11 @@ void rainbowCycle(uint8_t wait)
     { // 5 cycles of all colors on wheel
         for (i = 0; i < NUMPIXELS; i++)
         {
+            #ifdef COLOR_SAME
+            wheel(((0 * 256 / NUMPIXELS) + j) & 255, i);
+            #else
             wheel(((i * 256 / NUMPIXELS) + j) & 255, i);
+            #endif
         }
         //strip.show();
         ws2812_setleds(leds, NUMPIXELS);

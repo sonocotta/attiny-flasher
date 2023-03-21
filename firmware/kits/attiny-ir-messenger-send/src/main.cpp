@@ -36,7 +36,7 @@ void setup()
   pinMode(PIN_BTN_1, INPUT);
   pinMode(PIN_BTN_2, INPUT);
 
-  IrSender.begin(PIN_IR_SND, false);
+  IrSender.begin(PIN_IR_SND);
   IrSender.enableIROut(SAMS_CRR_FQ);
 
   irrecv.enableIRIn();
