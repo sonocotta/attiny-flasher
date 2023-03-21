@@ -63,7 +63,7 @@ Simply open project in the Platformio IDE and run `Platformio: Build` and `Platf
 
 Open [attiny-flasher](/firmware/flasher/attiny-flasher) folder in Platformio IDE. Find in the Platformio panel your revision of the board (Single letter, usually G, H, J etc is printed in the back side of the PCB). Use the physical switch on the Flasher to select self-programming mode.
 
-![image](https://user-images.githubusercontent.com/5459747/151625041-69a9ba3b-d6de-430b-9e14-deacd8441501.png)
+![image](https://user-images.githubusercontent.com/5459747/169228536-0cdf59e1-46b4-4efe-903c-ac8cbcd3741d.png)
 
 Run `Upload` task.
 
