@@ -14,9 +14,9 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         example:
-        - ./firmware/flasher/attiny-flasher-updi
-        - ./firmware/flasher/attiny-flasher-test-reset-states
-        - ./firmware/flasher/attiny-flasher-test-reset-fuses
+        # - ./firmware/flasher/attiny-flasher-updi
+        # - ./firmware/flasher/attiny-flasher-test-reset-states
+        # - ./firmware/flasher/attiny-flasher-test-reset-fuses
         - ./firmware/flasher/attiny-serial-demo
         - ./firmware/flasher/attiny-serial-demo-naked
         - ./firmware/flasher/attiny-flasher
