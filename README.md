@@ -115,7 +115,7 @@ Please find more information in the [hardware](/hardware) section
 
 ## Firmware
 
-Please find more information in the [software](/hardware) section
+Please find more information in the [software](/firmware) section
 
 ## Where to buy
 
